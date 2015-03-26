@@ -1,3 +1,5 @@
+import org.grails.plugins.jndideclareresourceref.ResourceRefWebDescriptorUpdater
+
 @SuppressWarnings("GroovyUnusedDeclaration")
 class JndiDeclareResourceRefGrailsPlugin {
   def version = "1.0.0.BUILD-SNAPSHOT"
@@ -27,5 +29,6 @@ It also allows manual declaration of custom resource-ref and resource-env-ref, a
   def scm = [ url: 'https://github.com/dmurat/jndi-declare-resource-ref' ]
 
   def doWithWebDescriptor = { webXml ->
+    ResourceRefWebDescriptorUpdater.updateWebDescriptor(webXml, application.config)
   }
 }
