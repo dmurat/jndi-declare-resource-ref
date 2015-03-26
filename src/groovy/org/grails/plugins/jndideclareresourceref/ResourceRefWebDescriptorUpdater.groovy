@@ -14,26 +14,51 @@ class ResourceRefWebDescriptorUpdater {
     addCustomResourceRefDescriptors(resourceRefDescriptorList, applicationConfig)
     resourceRefDescriptorList = filterOutExistingResourceRefs(webXml, resourceRefDescriptorList)
 
-    //noinspection GrUnresolvedAccess,GroovyAssignabilityCheck
-    def lastWebXmlNode = webXml.children()[webXml.children().size() - 1]
+    if (resourceRefDescriptorList) {
+      //noinspection GrUnresolvedAccess,GroovyAssignabilityCheck
+      def lastWebXmlNode = webXml.children()[webXml.children().size() - 1]
 
-    resourceRefDescriptorList.reverseEach { Map resourceRefDescriptor ->
-      if (LOGGER.isInfoEnabled()) {
-        LOGGER.info("resource-ref added in web.xml - resource-ref: ${resourceRefDescriptor.inspect()}")
-      }
+      resourceRefDescriptorList.reverseEach { Map resourceRefDescriptor ->
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info("resource-ref added in web.xml - resource-ref: ${resourceRefDescriptor.inspect()}")
+        }
 
-      lastWebXmlNode + {
-        "resource-ref" {
-          if (resourceRefDescriptor.description) {
-            "description"(resourceRefDescriptor.description)
+        lastWebXmlNode + {
+          "resource-ref" {
+            if (resourceRefDescriptor.description) {
+              "description"(resourceRefDescriptor.description)
+            }
+
+            "res-ref-name"(resourceRefDescriptor.resRefName)
+            "res-type"(resourceRefDescriptor.resType)
+            "res-auth"(resourceRefDescriptor.resAuth)
+
+            if (resourceRefDescriptor.resSharingScope) {
+              "res-sharing-scope"(resourceRefDescriptor.resSharingScope)
+            }
           }
+        }
+      }
+    }
 
-          "res-ref-name"(resourceRefDescriptor.resRefName)
-          "res-type"(resourceRefDescriptor.resType)
-          "res-auth"(resourceRefDescriptor.resAuth)
+    List configuredResourceEnvRefDescriptorList = createConfiguredResourceEnvRefDescriptors(applicationConfig)
+    if (configuredResourceEnvRefDescriptorList) {
+      //noinspection GrUnresolvedAccess, GroovyAssignabilityCheck
+      def lastWebXmlNode = webXml.children()[webXml.children().size() - 1]
 
-          if (resourceRefDescriptor.resSharingScope) {
-            "res-sharing-scope"(resourceRefDescriptor.resSharingScope)
+      configuredResourceEnvRefDescriptorList.reverseEach { Map resourceEnvRefDescriptor ->
+        if (LOGGER.isInfoEnabled()) {
+          LOGGER.info("resource-env-ref added in web.xml - resource-env-ref: ${resourceEnvRefDescriptor.inspect()}")
+        }
+
+        lastWebXmlNode + {
+          "resource-env-ref" {
+            if (resourceEnvRefDescriptor.description) {
+              "description"(resourceEnvRefDescriptor.description)
+            }
+
+            "resource-env-ref-name"(resourceEnvRefDescriptor.resourceEnvRefName)
+            "resource-env-ref-type"(resourceEnvRefDescriptor.resourceEnvRefType)
           }
         }
       }
@@ -221,5 +246,50 @@ class ResourceRefWebDescriptorUpdater {
     }
 
     return filteredOutResourceRefDescriptorList
+  }
+
+  static List createConfiguredResourceEnvRefDescriptors(ConfigObject applicationConfig) {
+    List resourceEnvRefDescriptorList = []
+
+    def resourceEnvRefListConfig = applicationConfig?.grails?.jndiDeclareResourceRef?.resourceEnvRefList
+    if (resourceEnvRefListConfig) {
+      List configuredResourceEnvRefDescriptorList = resourceEnvRefListConfig as List
+
+      configuredResourceEnvRefDescriptorList.each { Map configuredResourceEnvRefDescriptor ->
+        Map resourceEnvRefDescriptor = [:]
+        String resourceEnvRefName = configuredResourceEnvRefDescriptor.resourceEnvRefName
+        if (!resourceEnvRefName) {
+          LOGGER.warn("Skipping resource-env-ref config since there is no mandatory resource-env-ref-name defined - resource-env-ref: ${configuredResourceEnvRefDescriptor.inspect()}")
+          return
+        }
+        else {
+          Map descriptorFound = resourceEnvRefDescriptorList.find { Map descriptor -> descriptor.resourceEnvRefName == resourceEnvRefName} as Map
+          if (descriptorFound) {
+            LOGGER.warn("Skipping configured resource-env-ref since already existing one is detected for name '$resourceEnvRefName'.")
+            return
+          }
+
+          resourceEnvRefDescriptor.resourceEnvRefName = resourceEnvRefName
+        }
+
+        String resourceEnvRefType = configuredResourceEnvRefDescriptor.resourceEnvRefType
+        if (!resourceEnvRefType) {
+          LOGGER.warn("Skipping resource-env-ref config since there is no mandatory resource-env-ref-type defined - resource-env-ref: ${configuredResourceEnvRefDescriptor.inspect()}")
+          return
+        }
+        else {
+          resourceEnvRefDescriptor.resourceEnvRefType = resourceEnvRefType
+        }
+
+        String description = configuredResourceEnvRefDescriptor.description
+        if (description) {
+          resourceEnvRefDescriptor.description = description
+        }
+
+        resourceEnvRefDescriptorList << resourceEnvRefDescriptor
+      }
+    }
+
+    return resourceEnvRefDescriptorList
   }
 }
