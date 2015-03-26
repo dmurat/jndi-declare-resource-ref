@@ -19,7 +19,7 @@ class ResourceRefWebDescriptorUpdater {
 
     resourceRefDescriptorList.reverseEach { Map resourceRefDescriptor ->
       if (LOGGER.isInfoEnabled()) {
-        LOGGER.info("Resource reference is added in web.xml - resource-ref: ${resourceRefDescriptor.inspect()}")
+        LOGGER.info("resource-ref added in web.xml - resource-ref: ${resourceRefDescriptor.inspect()}")
       }
 
       lastWebXmlNode + {
@@ -95,7 +95,7 @@ class ResourceRefWebDescriptorUpdater {
       configuredResourceRefDescriptorList.each { Map configuredResourceRefDescriptor ->
         String resRefName = configuredResourceRefDescriptor.resRefName
         if (!resRefName) {
-          LOGGER.warn("Resource reference config will be skipped since there is no resource reference name defined: ${configuredResourceRefDescriptor.inspect()}")
+          LOGGER.warn("Skipping resource-ref config since there is no mandatory resource reference name defined - resource-ref: ${configuredResourceRefDescriptor.inspect()}")
           return
         }
 
@@ -107,13 +107,13 @@ class ResourceRefWebDescriptorUpdater {
 
         String resType = configuredResourceRefDescriptor.resType
         if (!isOverriding && !resType) {
-          LOGGER.warn("Resource reference config will be skipped since there is no mandatory resource type defined: ${configuredResourceRefDescriptor.inspect()}")
+          LOGGER.warn("Skipping resource-ref config since there is no mandatory resource type defined - resource-ref: ${configuredResourceRefDescriptor.inspect()}")
           return
         }
 
         String resAuth = configuredResourceRefDescriptor.resAuth
         if (!isOverriding && !resAuth) {
-          LOGGER.warn("Resource reference config will be skipped since there is no mandatory resource auth defined: ${configuredResourceRefDescriptor.inspect()}")
+          LOGGER.warn("Skipping resource-ref config since there is no mandatory resource auth defined - resource-ref: ${configuredResourceRefDescriptor.inspect()}")
           return
         }
 
@@ -122,8 +122,8 @@ class ResourceRefWebDescriptorUpdater {
 
         if (isOverriding) {
           if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Overriding resource ref with name $resRefName ...")
-            LOGGER.info("  Resource reference values before override: ${resourceRefDescriptorFound.inspect()}")
+            LOGGER.info("Overriding resource ref '$resRefName' ...")
+            LOGGER.info("    before override resource-ref: ${resourceRefDescriptorFound.inspect()}")
           }
 
           if (resType) {
@@ -143,7 +143,7 @@ class ResourceRefWebDescriptorUpdater {
           }
 
           if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("  Resource reference values after override: ${resourceRefDescriptorFound.inspect()}")
+            LOGGER.info("    after override resource-ref: ${resourceRefDescriptorFound.inspect()}")
           }
         }
         else {
@@ -163,10 +163,6 @@ class ResourceRefWebDescriptorUpdater {
 
           if (resSharingScope) {
             resourceRefDescriptorToAdd.resSharingScope = resSharingScope
-          }
-
-          if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Adding custom resource reference: ${resourceRefDescriptorToAdd.inspect()}")
           }
 
           resourceRefDescriptorList << resourceRefDescriptorToAdd
