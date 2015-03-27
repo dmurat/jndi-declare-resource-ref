@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/dmurat/jndi-declare-resource-ref.svg?branch=master)](https://travis-ci.org/dmurat/jndi-declare-resource-ref)
+
 # jndi-declare-resource-ref
 Grails plugin which automatically creates `resource-ref` entries in web.xml for detected JNDI datasources and mail sessions.
 
