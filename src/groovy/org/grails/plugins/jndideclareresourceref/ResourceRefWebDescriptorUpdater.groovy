@@ -1,5 +1,7 @@
 package org.grails.plugins.jndideclareresourceref
 
+import groovy.xml.StreamingMarkupBuilder
+import groovy.xml.XmlUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -65,8 +67,19 @@ class ResourceRefWebDescriptorUpdater {
     }
 
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Following is a full web.xml after adding detected and configured resource-ref and resource-env-ref entries:\n${ webXml.serialize() }")
+      LOGGER.debug("Following is a full web.xml after adding detected and configured resource-ref and resource-env-ref entries:\n${ serializeWebXml(webXml) }")
     }
+  }
+
+  static String serializeWebXml(xml) {
+    def outputBuilder = new StreamingMarkupBuilder()
+
+    Writable outputXml = outputBuilder.bind {
+      mkp.declareNamespace('': 'http://java.sun.com/xml/ns/javaee')
+      mkp.yield xml
+    } as Writable
+
+    return XmlUtil.serialize(outputXml)
   }
 
   static void addDataSourceResourceRefDescriptors(List resourceRefDescriptorList, ConfigObject applicationConfig) {
