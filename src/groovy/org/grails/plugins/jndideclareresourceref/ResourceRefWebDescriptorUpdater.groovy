@@ -67,7 +67,15 @@ class ResourceRefWebDescriptorUpdater {
     }
 
     if (LOGGER.isDebugEnabled()) {
-      LOGGER.debug("Following is a full web.xml after adding detected and configured resource-ref and resource-env-ref entries:\n${ serializeWebXml(webXml) }")
+      String serializedWebXml
+      if (webXml.respondsTo("serialize")) {
+        serializedWebXml = webXml.serialize()
+      }
+      else {
+        serializedWebXml = serializeWebXml(webXml)
+      }
+
+      LOGGER.debug("Following is a full web.xml after adding detected and configured resource-ref and resource-env-ref entries:\n${ serializedWebXml }")
     }
   }
 
