@@ -13,4 +13,6 @@ log4j = {
         'org.springframework',
         'org.hibernate',
         'net.sf.ehcache.hibernate'
+
+//  debug "org.grails.plugins.jndideclareresourceref"
 }
